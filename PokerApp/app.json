@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PokerApp",
-    "slug": "PokerApp",
+    "slug": "omnicient-poker-app",
     "version": "1.0.0",
     "scheme": "pokerapp",
     "platforms": [
@@ -11,7 +11,7 @@
     ],
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
@@ -41,6 +41,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b0bb6e9e-5fbd-464c-a8ff-23e92cf5acad"
+      }
+    },
+    "owner": "ericpesci"
   }
 }

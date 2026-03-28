@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-@ooy+-!#o3x9%a&4gs*kb+_=up(lt-#_%z8wo7@8&f170wnzsj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '44.236.160.177']
+ALLOWED_HOSTS = ['localhost', '44.236.160.177', 'waves-solve-artist-low.trycloudflare.com']
 
 
 # Application definition
@@ -42,10 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8081',
-    'http://127.0.0.1:8081',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
