@@ -46,6 +46,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Node / Expo
+node_modules/
+
 # Virtual environments
 venv/
 env/

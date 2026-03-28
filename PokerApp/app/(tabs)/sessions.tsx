@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { addSession, deleteSession, Session } from '../../store/sessionsSlice';
+import { fetchSessions, createSession, removeSession, Session } from '../../store/sessionsSlice';
 
 const EMPTY_FORM = {
   date: '',
@@ -95,9 +95,13 @@ export default function SessionsScreen() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  useEffect(() => {
+    dispatch(fetchSessions());
+  }, []);
+
   function handleSubmit() {
     if (!hasValidBuyin) return;
-    dispatch(addSession(form));
+    dispatch(createSession(form));
     setForm(EMPTY_FORM);
   }
 
@@ -229,7 +233,7 @@ export default function SessionsScreen() {
               <SessionCard
                 key={entry.id}
                 entry={entry}
-                onDelete={() => dispatch(deleteSession(entry.id))}
+                onDelete={() => dispatch(removeSession(entry.id))}
               />
             ))}
           </View>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { addPlayerNote, deletePlayerNote, PlayerNote } from '../../store/playerNotesSlice';
+import { fetchPlayerNotes, createPlayerNote, removePlayerNote, PlayerNote } from '../../store/playerNotesSlice';
 
 const EMPTY_FORM = { name: '', location: '', stakes: '', playstyle: '', notes: '' };
 
@@ -61,9 +61,13 @@ export default function PlayerNotesScreen() {
   const entries = useAppSelector((state) => state.playerNotes.entries);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  useEffect(() => {
+    dispatch(fetchPlayerNotes());
+  }, []);
+
   function handleSubmit() {
     if (!form.name.trim()) return;
-    dispatch(addPlayerNote(form));
+    dispatch(createPlayerNote(form));
     setForm(EMPTY_FORM);
   }
 
@@ -145,7 +149,7 @@ export default function PlayerNotesScreen() {
               <NoteCard
                 key={entry.id}
                 entry={entry}
-                onDelete={() => dispatch(deletePlayerNote(entry.id))}
+                onDelete={() => dispatch(removePlayerNote(entry.id))}
               />
             ))}
           </View>
