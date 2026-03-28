@@ -23,7 +23,6 @@ const initialState: PlayerNotesState = {
   error: null,
 };
 
-// Maps a backend API response object to the frontend PlayerNote shape
 function fromApi(data: any): PlayerNote {
   return {
     id: String(data.id),
@@ -75,6 +74,7 @@ const playerNotesSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // --- fetch ---
       .addCase(fetchPlayerNotes.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -87,11 +87,31 @@ const playerNotesSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? 'Failed to load player notes';
       })
-      .addCase(createPlayerNote.fulfilled, (state, action) => {
-        state.entries.unshift(action.payload);
+      // --- create (optimistic) ---
+      .addCase(createPlayerNote.pending, (state, action) => {
+        const form = action.meta.arg;
+        state.entries.unshift({
+          ...form,
+          id: action.meta.requestId,
+          createdAt: new Date().toLocaleDateString(),
+        });
       })
-      .addCase(removePlayerNote.fulfilled, (state, action) => {
-        state.entries = state.entries.filter((e) => e.id !== action.payload);
+      .addCase(createPlayerNote.fulfilled, (state, action) => {
+        // Replace the optimistic entry with the real one from the backend
+        const idx = state.entries.findIndex((e) => e.id === action.meta.requestId);
+        if (idx !== -1) state.entries[idx] = action.payload;
+      })
+      .addCase(createPlayerNote.rejected, (state, action) => {
+        // Roll back the optimistic entry if the backend call failed
+        state.entries = state.entries.filter((e) => e.id !== action.meta.requestId);
+        state.error = action.error.message ?? 'Failed to save player note';
+      })
+      // --- remove (optimistic) ---
+      .addCase(removePlayerNote.pending, (state, action) => {
+        state.entries = state.entries.filter((e) => e.id !== action.meta.arg);
+      })
+      .addCase(removePlayerNote.rejected, (state, action) => {
+        state.error = action.error.message ?? 'Failed to delete player note';
       });
   },
 });

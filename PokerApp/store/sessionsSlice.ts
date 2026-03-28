@@ -25,7 +25,6 @@ const initialState: SessionsState = {
   error: null,
 };
 
-// Maps a backend API response object to the frontend Session shape
 function fromApi(data: any): Session {
   const buyins = parseFloat(data.total_buyins) || 0;
   const cashout = parseFloat(data.total_cashout) || 0;
@@ -81,6 +80,7 @@ const sessionsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // --- fetch ---
       .addCase(fetchSessions.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -93,11 +93,33 @@ const sessionsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? 'Failed to load sessions';
       })
-      .addCase(createSession.fulfilled, (state, action) => {
-        state.entries.unshift(action.payload);
+      // --- create (optimistic) ---
+      .addCase(createSession.pending, (state, action) => {
+        const form = action.meta.arg;
+        const buyins = parseFloat(form.totalBuyins) || 0;
+        const cashout = parseFloat(form.totalCashout) || 0;
+        state.entries.unshift({
+          ...form,
+          id: action.meta.requestId,
+          profit: cashout - buyins,
+        });
       })
-      .addCase(removeSession.fulfilled, (state, action) => {
-        state.entries = state.entries.filter((e) => e.id !== action.payload);
+      .addCase(createSession.fulfilled, (state, action) => {
+        // Replace the optimistic entry with the real one from the backend
+        const idx = state.entries.findIndex((e) => e.id === action.meta.requestId);
+        if (idx !== -1) state.entries[idx] = action.payload;
+      })
+      .addCase(createSession.rejected, (state, action) => {
+        // Roll back the optimistic entry if the backend call failed
+        state.entries = state.entries.filter((e) => e.id !== action.meta.requestId);
+        state.error = action.error.message ?? 'Failed to save session';
+      })
+      // --- remove (optimistic) ---
+      .addCase(removeSession.pending, (state, action) => {
+        state.entries = state.entries.filter((e) => e.id !== action.meta.arg);
+      })
+      .addCase(removeSession.rejected, (state, action) => {
+        state.error = action.error.message ?? 'Failed to delete session';
       });
   },
 });
